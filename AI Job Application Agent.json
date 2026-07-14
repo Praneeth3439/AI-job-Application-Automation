@@ -1,0 +1,625 @@
+{
+  "name": "AI Job Application Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "user-profile",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5f87b04d-e80f-490b-beb8-533ef6932c2c",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        288
+      ],
+      "webhookId": "81777f9c-0c5a-473b-8dcc-7b09ace4cba8"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"Create an ATS-optimized resume using the candidate profile below.\\n\\nCandidate Profile:\\n\" + JSON.stringify($json.body, null, 2) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert ATS Resume Writer.  You will receive a candidate profile in JSON.  Generate a professional ATS-friendly resume.  Return ONLY the resume in Markdown."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "ea9eb3e0-29e5-4ea0-b5f6-6a7cf88a65cd",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "262ef113-26bc-4954-9a43-b2471c7b9f50",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        512
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "elw34zgIey4b8i2t",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=a60baa01&app_key=e86f55033df26481755873592eb4b47c&what=Software%20Engineer&results_per_page=20",
+        "options": {}
+      },
+      "id": "31233e8c-b8f1-4754-ba77-2c8fd2c79f96",
+      "name": "Search Jobs (Adzuna)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        576,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "f3aa61cf-953b-49f0-81b3-8e4479e0b3f6",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://jsearch.p.rapidapi.com/search-v2?query=developer%20jobs%20in%20chicago&num_pages=1&country=us&date_posted=all",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "Software Engineer"
+            },
+            {
+              "name": "page",
+              "value": "1"
+            },
+            {
+              "name": "num_pages",
+              "value": "1"
+            },
+            {
+              "name": "country",
+              "value": "in"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-RapidAPI-Key",
+              "value": "4f5859d1d9msh81cd8e20ceaa950p1b8913jsnb0a2a7892a98"
+            },
+            {
+              "name": "X-RapidAPI-Host",
+              "value": "jsearch.p.rapidapi.com"
+            },
+            {
+              "name": "Content-Type",
+              "value": " application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "652c0d59-b1d6-4c67-90e0-c1cc0e4ade96",
+      "name": "Search Jobs (JSearch)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        576,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "1a13a91d-2e13-4a72-a922-a4fe1e639c12",
+      "name": "Split Out1",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        800,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/datasets/XdLsg7l5S6Md4Z5ib/items?token=YOUR_APIFY_API_TOKEN",
+        "options": {}
+      },
+      "id": "6e288dd3-61c7-4386-b7ec-95d9baac4e69",
+      "name": "Search Jobs (LinkedIn)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/datasets/dbkfJDLdTERpTs49Z/items?token=YOUR_APIFY_API_TOKEN",
+        "options": {}
+      },
+      "id": "20d4bda8-ba95-4047-9d90-7fa6cac3ce48",
+      "name": "Search Jobs (Internshala)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "6e6c8d86-6b91-48b2-a8ad-e4480fa064a9",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1024,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "maxItems": 30
+      },
+      "id": "4c455bee-3a32-4775-8c69-81130c3d81f7",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f81f0918-5742-4828-9b9f-4f7d7489166f",
+              "name": "title",
+              "value": "={{$json.title}}",
+              "type": "string"
+            },
+            {
+              "id": "4b676fb6-01fa-4736-83c6-11aad29707e5",
+              "name": "company",
+              "value": "={{$json.company.display_name ?? $json.company}}",
+              "type": "string"
+            },
+            {
+              "id": "5c6147f8-bc63-4e5e-a71b-44ae5ed923e3",
+              "name": "location",
+              "value": "={{$json.location.display_name ?? $json.location}}",
+              "type": "string"
+            },
+            {
+              "id": "92a9bd11-77df-449c-a19b-17ad76831873",
+              "name": "salary",
+              "value": "={{$json.salary}}",
+              "type": "string"
+            },
+            {
+              "id": "23667b7c-b756-46b3-aa7d-102ccee518f6",
+              "name": "url",
+              "value": "={{$json.redirect_url ?? $json.url}}",
+              "type": "string"
+            },
+            {
+              "id": "fef5d697-b828-48f7-a257-971d180d8cc5",
+              "name": "platform",
+              "value": "Unknown",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c4728121-6c11-4a0c-94c7-b629324a155f",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "jobs",
+        "options": {}
+      },
+      "id": "b6388042-b8f6-40f2-bde4-f256002bba56",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert AI Career Assistant.\n\nThe candidate profile is:\n\n- Education: B.Tech Computer Science Engineering\n- Current Year: 3rd Year\n- Experience Level: Fresher\n- Internship: Google AI-ML Virtual Internship\n- Skills:\n  - Java\n  - Spring Boot\n  - Python\n  - SQL\n  - AWS\n  - Data Structures & Algorithms\n  - Object-Oriented Programming\n  - DBMS\n  - Operating Systems\n  - Computer Networks\n\nThe candidate is looking for these roles:\n- Software Engineer\n- Associate Software Engineer\n- Graduate Engineer Trainee\n- Backend Developer\n- Cloud Engineer\n- AI/ML Engineer\n- SDE 1\n- Internship\n\nIgnore any job that:\n- Requires more than 2 years of experience.\n- Has a missing title, company, or URL.\n- Is a Principal, Staff, Lead, Manager, Architect, or Senior-level position.\n\nAnalyze every job in the array.\n\nTasks:\n1. Score each eligible job from 1 to 100 based on how well it matches the candidate's profile.\n2. Rank the jobs from best to worst.\n3. Return only the top 10 jobs.\n4. Include:\n   - title\n   - company\n   - location\n   - platform\n   - salary\n   - url\n   - score\n   - reason\n\nJobs:\n\n{{ JSON.stringify($json.jobs, null, 2) }}\n\nReturn ONLY valid JSON matching the connected Structured Output Parser schema.\nDo not return Markdown.\nDo not include explanations outside the JSON.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an experienced Career Coach and ATS expert.  Always rank the best jobs first.  Never invent job information.  Only use the provided job data.  If salary is unavailable, write \"Not Mentioned.\"  If company or URL is missing, keep it null.  Return ONLY valid JSON.  Do not return Markdown.  Do not return explanations.  The JSON must match the required schema exactly."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "a500a253-2fa8-431d-8469-fba5bc0277ac",
+      "name": "Job Analyzer",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1920,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "c45e81ac-5172-4b54-a245-8825dc403069",
+      "name": "Google Gemini Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1936,
+        448
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "elw34zgIey4b8i2t",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"top_jobs\": [\n    {\n      \"title\": \"Software Engineer\",\n      \"company\": \"Google\",\n      \"location\": \"Bangalore\",\n      \"platform\": \"LinkedIn\",\n      \"salary\": \"₹12-18 LPA\",\n      \"url\": \"https://example.com/job\",\n      \"score\": 95,\n      \"reason\": \"Excellent match with Java, Spring Boot, AWS and DSA skills.\"\n    }\n  ]\n}",
+        "autoFix": true
+      },
+      "id": "2ff98e95-8397-4ef0-99aa-ee47c8aab8bf",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2064,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "1a2b0604-f742-4e28-ac0b-1abd89e8d912",
+      "name": "Google Gemini Chat Model (Parser Auto-fix)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2064,
+        656
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "elw34zgIey4b8i2t",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "options": {}
+      },
+      "id": "255e8305-da10-4cb8-a19a-26e6f4a20b34",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2464,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://praneeth3439.app.n8n.cloud/webhook/generate-resume",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"job\": {\n    \"title\": \"{{ $json.output.top_jobs[0].title }}\",\n    \"company\": \"{{ $json.output.top_jobs[0].company }}\",\n    \"location\": \"{{ $json.output.top_jobs[0].location }}\",\n    \"description\": \"{{ $json.output.top_jobs[0].reason }}\"\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "00d40af2-8d43-4122-ab2a-5f093eefc38f",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2288,
+        240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Search Jobs (Adzuna)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Jobs (JSearch)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Jobs (LinkedIn)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Jobs (Internshala)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Jobs (Adzuna)": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Jobs (JSearch)": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Search Jobs (LinkedIn)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Search Jobs (Internshala)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Job Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Analyzer": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Job Analyzer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Job Analyzer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model (Parser Auto-fix)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4c649b6e-492a-45f7-ae6f-085271c5e683",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "02def17432c76625f9b79661e16ac1ad49b1de1909b34bb7510b0af9a90dd52f"
+  },
+  "nodeGroups": [],
+  "id": "CEw83u66WBwVlh6F",
+  "tags": []
+}

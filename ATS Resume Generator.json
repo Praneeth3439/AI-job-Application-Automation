@@ -1,0 +1,202 @@
+{
+  "name": "ATS Resume Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-resume",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "4895b0e7-30c9-473d-9011-5ce44afa3a60",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "ee3440bf-2e04-49d2-9dea-b5e13689818e"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ffe4aad-be50-43b7-bbe4-c579952b06f0",
+              "name": "resume",
+              "value": "NUKAVARAPU PRANEETH Guntur, Andhra Pradesh +91 8125491948 | nukavarapupraneeth@gmail.com LinkedIn | GitHub | LeetCode | CodeChef | HackerRank Professional Summary Computer Science undergraduate skilled in Java, Python, Data Structures & Algorithms, Spring Boot, and AWS Cloud. Passionate about software engineering, full-stack development, and solving real-world problems. Education KL University Guntur, Andhra Pradesh Bachelor of Technology (Computer Science and Engineering) Jun 2024 – May 2028 CGPA: 8.72 / 10.0 Internship Experience AI-ML Virtual Internship Apr 2026 – Jun 2026 Google for Developers & EduSkills Virtual • Completed an 8-week virtual internship focused on Artificial Intelligence and Machine Learning. • Worked with Python libraries and datasets to understand data preprocessing and machine learning workflows. • Learned supervised learning concepts including classification and regression techniques. • Applied machine learning concepts through hands-on exercises and practical assignments. • Improved analytical and problem-solving skills by working on real-world AI/ML tasks. Technical Skills Programming Languages: Java, Python, C, JavaScript Core CS: Data Structures & Algorithms, Object-Oriented Programming, DBMS, Operating Systems, Computer Networks Frameworks: Spring Boot, Hibernate, React.js, Node.js Databases: MySQL, PostgreSQL Cloud: AWS Certified Cloud Practitioner Developer Tools: Git, GitHub, Linux, VS Code, Eclipse Projects Student Peer Review & Collaboration Platform | Java, Spring Boot, Hibernate, MySQL, HTML, CSS, JavaScriptGitHub • Built a full-stack web application for peer review and collaboration. • Developed RESTful APIs using Spring Boot and Hibernate to manage users, projects, and peer reviews. • Designed and implemented a normalized MySQL database to efficiently store application data. • Created a responsive user interface using HTML, CSS, and JavaScript for seamless user interaction. • Used Git and GitHub for collaborative development and version control. Achievements • Rank 172 on the Smart Interviews Coding Leaderboard. • Club Lead – KLU FOCUS Technical Club. Certifications • AWS Certified Cloud Practitioner • AI-ML Virtual Internship Certificate (Google for Developers & EduSkills) • Essential Automation Certification",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8ff84025-67d8-4fe2-ae41-339332e825f8",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert ATS Resume Writer.\n\nCandidate Resume:\n\n{{$json.resume}}\n\nSelected Job:\n\n{{ JSON.stringify($json.body.job, null, 2) }}\n\nRewrite the resume specifically for this job.\n\nRules:\n\n- Never invent experience.\n- Never invent internships.\n- Never invent projects.\n- Never invent certifications.\n- Only improve wording.\n- Add ATS keywords from the job description.\n- Reorder skills based on relevance.\n- Optimize the Professional Summary.\n- Keep the resume to one page.\n\nOutput format:\n- Return ONLY a complete, valid HTML document starting with <!DOCTYPE html> and ending with </html>.\n- Do NOT wrap the output in Markdown code fences or add any commentary.\n- Include a <style> block in the <head> with clean, professional, print-friendly inline CSS (readable sans-serif font, ~11-12px body text, clear section headings, bold candidate name, subtle section dividers, tight one-page margins suitable for A4).\n- Use semantic HTML (h1 for name, h2 for section titles, ul/li for bullet points).",
+        "batching": {}
+      },
+      "id": "e0ae9799-e69f-47aa-923d-3084392c3165",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "55798658-7cab-42bb-82d6-7efa1221c845",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        336
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "elw34zgIey4b8i2t",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"source\": $json.text, \"sandbox\": true } }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "fd26b0de-b13b-440e-a772-7ede64b3defc",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        112
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YCBDqNlkAj3ZBop7",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1008,
+        128
+      ],
+      "id": "9fb83b71-ebb7-4778-88d9-e578119c8a6d",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "27d0e7d8-4bb5-42bf-9f16-5134b5cb2ff7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "02def17432c76625f9b79661e16ac1ad49b1de1909b34bb7510b0af9a90dd52f"
+  },
+  "nodeGroups": [],
+  "id": "76TmZexjTqpY2Z2G",
+  "tags": []
+}
